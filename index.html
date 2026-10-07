@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corridor · emergency routing atlas · Nebin Stanly</title>
+<meta name="description" content="DAA CIA-3 prototype: shortest-path routing for ambulances on a congested, flood-prone city graph. Five algorithms, live traffic, executable tests, benchmarks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23ece4d2'/%3E%3Cg transform='translate(2 7)'%3E%3Crect x='10.6' y='.7' width='3.6' height='2.1' fill='%23d2401c'/%3E%3Cpath d='M1 14V4.2Q1 3 2.2 3H17.3L22.4 9.2 26.2 10Q27 10.2 27 11V14Z' fill='%23ece4d2' stroke='%231c1a16' stroke-width='1.4' stroke-linejoin='round'/%3E%3Crect x='1.7' y='10.9' width='24.6' height='1.5' fill='%23d2401c'/%3E%3Cpath d='M18.2 4.6 21.7 9H18.2Z' fill='%231c1a16'/%3E%3Cpath d='M6.2 6.1h4.6v1.3H6.2zM7.85 4.45h1.3v4.6h-1.3z' fill='%23d2401c'/%3E%3Ccircle cx='6.2' cy='14.4' r='2.9' fill='%231c1a16'/%3E%3Ccircle cx='22.1' cy='14.4' r='2.9' fill='%231c1a16'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body id="top">
+
+<header class="mast">
+  <div class="mast-rule">
+    <span>Design &amp; Analysis of Algorithms</span>
+    <span>CIA 3 · Innovative Assignment</span>
+    <span>Staff-in-charge: Dr. P. Margaret Savitha</span>
+    <span class="who">Nebin Stanly <i>·</i> Reg. No. 2443142</span>
+  </div>
+  <div class="mast-hero">
+    <h1><span id="wordmark">Corridor<i class="beacon"></i></span></h1>
+    <div class="mast-lead">
+      <p class="deck">An ambulance leaves Yeshwanthpur at 6:30&nbsp;pm. Every road in Bengaluru is moving at a different speed, and some are under water. <em>Which way is fastest?</em></p>
+      <p class="byline">A routing atlas: one live map of the city, five algorithms, a test ledger and a benchmark lab. The board below is not a recording: every ambulance on it is being routed right now.</p>
+    </div>
+  </div>
+  <figure class="board" id="board">
+    <canvas id="boardCv" aria-label="Live board: ambulances driving their fastest routes to hospitals across Bengaluru"></canvas>
+    <figcaption><b>Live board</b><span id="boardCap">every incident is answered by one multi-target Dijkstra; the ambulance drives the route it returns</span></figcaption>
+    <span class="board-hint">click an ambulance to open its dispatch in the console ↓</span>
+  </figure>
+  <dl class="mast-facts" aria-label="At a glance">
+    <div><dt>junctions</dt><dd data-g="n">–</dd></div>
+    <div><dt>road segments</dt><dd data-g="m">–</dd></div>
+    <div><dt>places to pick</dt><dd data-g="p">–</dd></div>
+    <div><dt>hospitals</dt><dd data-g="h">–</dd></div>
+    <div><dt>algorithms raced</dt><dd>5</dd></div>
+    <div><dt>live tests</dt><dd>10</dd></div>
+  </dl>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <div class="toc-in">
+    <a class="toc-brand" href="#top" aria-label="Back to top"><svg class="amb" viewBox="0 0 28 19" aria-hidden="true"><rect class="a-light" x="10.6" y="0.7" width="3.6" height="2.1"/><path class="a-body" d="M1 14V4.2Q1 3 2.2 3H17.3L22.4 9.2 26.2 10Q27 10.2 27 11V14Z"/><rect class="a-red" x="1.7" y="10.9" width="24.6" height="1.5"/><path class="a-ink" d="M18.2 4.6 21.7 9H18.2Z"/><path class="a-red" d="M6.2 6.1h4.6v1.3H6.2zM7.85 4.45h1.3v4.6h-1.3z"/><circle class="a-ink" cx="6.2" cy="14.4" r="2.9"/><circle class="a-hub" cx="6.2" cy="14.4" r="1.1"/><circle class="a-ink" cx="22.1" cy="14.4" r="2.9"/><circle class="a-hub" cx="22.1" cy="14.4" r="1.1"/></svg>Corridor<i>.</i></a>
+    <a href="#problem">01 Problem</a><a href="#console">02 Console</a><a href="#race">03 Race</a><a href="#proof">04 Proof</a><a href="#lab">05 Lab</a><a href="#why">06 Verdict</a><a href="#colophon">07 Colophon</a>
+    <button id="themeBtn" class="btn tiny" type="button">Night chart</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============================================================ 01 PROBLEM -->
+<section id="problem" class="sec">
+  <div class="sec-no" aria-hidden="true">01</div>
+  <div class="sec-main">
+    <p class="kicker">The problem</p>
+    <h2>The fastest road is not the shortest road.</h2>
+    <div class="cols">
+      <div class="prose">
+        <p>A city is a graph: junctions are nodes, road segments are edges. When someone in Yeshwanthpur calls an ambulance, the dispatcher needs two answers inside a second: <b>which hospital</b>, and <b>which roads</b>.</p>
+        <p>Both answers depend on <i>this minute's</i> traffic, not on the printed map. Outer Ring Road at 6:30&nbsp;pm is a different road from the same stretch at 3&nbsp;am. After a cloudburst, Silk Board may not be a road at all. A router that is merely <i>correct</i> on yesterday's weights sends the ambulance into the jam.</p>
+        <p>So the problem is a <b>single-source shortest path on a graph whose edge weights are a function of time</b>, queried over and over, with edges disappearing at random. The prototype below solves it, proves it solves it, and measures what it costs.</p>
+        <aside class="note"><b>Honest scope.</b> The <span data-g="p">–</span> places, <span data-g="h">–</span> hospitals, lakes and eleven highways sit at their real positions, converted from approximate latitude and longitude. The street mesh between them is generated, and the traffic is a model, not a live feed. The algorithms don't know the difference; the same code would run on an OpenStreetMap extract.</aside>
+      </div>
+      <dl class="spec">
+        <div><dt>Input</dt><dd>
+          Road graph <i>G&nbsp;=&nbsp;(V,&nbsp;E)</i>: <b data-g="n">–</b> junctions, <b data-g="m">–</b> segments, <b data-g="p">–</b> named places, <b data-g="h">–</b> hospitals.<br>
+          Edge cost <i>w(e)</i> = length ÷ speed × (1 + time-of-day + weather + events) &nbsp;[minutes].<br>
+          Origin <i>s</i>; destination <i>d</i> <u>or</u> the hospital set <i>H</i>; the scene (day, hour, sky, events); siren on/off; closed roads <i>B&nbsp;⊂&nbsp;E</i>.
+        </dd></div>
+        <div><dt>Output</dt><dd>
+          A path <i>P</i> minimising Σ<sub>e∈P</sub>&nbsp;w<sub>t</sub>(e), with ETA, distance and mean speed. For dispatch: hospitals ranked by ETA.
+        </dd></div>
+        <div><dt>Constraints</dt><dd>
+          Weights ≥ 0 · answer in milliseconds · a wrong route is worse than a slow one, so the optimum must be <i>provable</i>.
+        </dd></div>
+        <div class="chosen"><dt>Chosen algorithm</dt><dd>
+          <b>A*</b> with an adaptive admissible heuristic for point-to-point trips; <b>multi-target Dijkstra</b> for “nearest hospital”. Dijkstra, Bidirectional Dijkstra, Bellman–Ford and Greedy best-first are implemented as rivals.
+        </dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 02 CONSOLE -->
+<section id="console" class="sec">
+  <div class="sec-no" aria-hidden="true">02</div>
+  <div class="sec-main">
+    <p class="kicker">The prototype</p>
+    <h2>Dispatch console</h2>
+    <p class="lede">Pick a place from the lists, or click anywhere on the map. Then change the world: the day, the sky, what else is happening. <b>Shift-click</b> any road to close it and watch the route re-plan. <b>Replay</b> runs the search again; <b>Big picture</b> opens it full screen, step by step.</p>
+
+    <div class="console">
+      <div class="plate-col">
+        <div class="trip" id="trip">
+          <div class="pick" id="pickA">
+            <span class="lbl" id="pickALbl">From</span>
+            <button type="button" class="pick-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pickALbl"><b class="mk">A</b><span class="pick-val">Choose a place</span><i class="caret" aria-hidden="true"></i></button>
+            <div class="pick-pop" hidden><input type="text" placeholder="Search places…" aria-label="Search origin" autocomplete="off" spellcheck="false"><ul role="listbox" aria-label="Origin"></ul></div>
+          </div>
+          <button type="button" class="swap" id="swap" aria-label="Swap origin and destination" title="Swap A and B"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg></button>
+          <div class="pick" id="pickB">
+            <span class="lbl" id="pickBLbl">To</span>
+            <button type="button" class="pick-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pickBLbl"><b class="mk b">B</b><span class="pick-val">Nearest hospital</span><i class="caret" aria-hidden="true"></i></button>
+            <div class="pick-pop" hidden><input type="text" placeholder="Search places and hospitals…" aria-label="Search destination" autocomplete="off" spellcheck="false"><ul role="listbox" aria-label="Destination"></ul></div>
+          </div>
+        </div>
+        <div class="plate-wrap" id="plateWrap">
+          <canvas id="plate" aria-label="Interactive city map. Click to place an incident or origin and destination."></canvas>
+          <div class="plate-cap">Plate II &nbsp;·&nbsp; Bengaluru &nbsp;·&nbsp; places to scale, streets generated</div>
+          <div class="zoom"><button id="zoomIn" type="button" aria-label="Zoom in">+</button><button id="zoomOut" type="button" aria-label="Zoom out">−</button><button id="resetView" type="button" aria-label="Fit to window">fit</button></div>
+          <div class="plate-tools">
+            <button type="button" id="replay" title="Run the search again from the start">↻ Replay</button>
+            <button type="button" id="expand" title="Open this search full screen, with step-by-step controls">⤢ Big picture</button>
+          </div>
+          <div id="tip" class="tip" hidden></div>
+        </div>
+        <ul class="legend" aria-label="Map legend">
+          <li><span class="ramp"></span>free flow → gridlock</li>
+          <li><i class="lg dash"></i>closed road (<b id="closedN">0</b>)</li>
+          <li><i class="lg hosp">+</i>hospital</li>
+          <li><i class="lg dot"></i>place</li>
+          <li><i class="lg tree"></i>search tree</li>
+          <li><i class="lg route"></i>route</li>
+        </ul>
+
+        <div class="controls">
+          <div class="scene">
+            <div class="ctl">
+              <span class="lbl">Set the scene <em>one tap</em></span>
+              <div class="chips" id="scenes"></div>
+            </div>
+            <div class="ctl clock">
+              <span class="lbl">Clock <b id="hourLabel">18:30</b> <em id="hourPhase"></em></span>
+              <div class="dial">
+                <svg id="hourCurve" viewBox="0 0 240 44" preserveAspectRatio="none" aria-hidden="true"></svg>
+                <input type="range" id="hour" min="0" max="24" step="0.25" value="18.5" aria-label="Time of day">
+                <div class="dial-ticks" aria-hidden="true"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
+              </div>
+            </div>
+            <div class="ctl"><span class="lbl">Day <em id="dayNote"></em></span><div class="chips" id="dayChips"></div></div>
+            <div class="ctl"><span class="lbl">Sky <em id="skyNote"></em></span><div class="chips" id="skyChips"></div></div>
+            <div class="ctl"><span class="lbl">Also happening <em id="evNote">tap any that apply</em></span><div class="chips" id="evChips"></div></div>
+          </div>
+
+          <aside class="why" id="why" aria-live="polite">
+            <span class="lbl">Why is the city slow right now?</span>
+            <div class="why-num"><b id="hourAvg">×1.00</b><small>a 10-minute drive on empty roads now takes <b id="whyTen">10</b> min</small></div>
+            <ul class="why-bars" id="whyBars"></ul>
+            <p class="why-closed"><b id="closedN2">0</b> roads closed <button type="button" id="clearBlocks" class="linkbtn">reopen the ones I closed</button></p>
+            <label class="check"><input type="checkbox" id="siren"><span>Siren on: traffic gives way</span></label>
+          </aside>
+
+          <div class="ctl wide">
+            <span class="lbl">Stories <em>a trip and a scene together</em></span>
+            <div class="cases" id="cases">
+              <button type="button" data-case="rush" aria-pressed="true"><b>I.</b> Yeshwanthpur, 6:30 pm: which hospital?</button>
+              <button type="button" data-case="silk" aria-pressed="false"><b>II.</b> Silk Board junction in the rain</button>
+              <button type="button" data-case="flood" aria-pressed="false"><b>III.</b> Monsoon flood, Electronic City to Hebbal</button>
+              <button type="button" data-case="night" aria-pressed="false"><b>IV.</b> Airport to Electronic City, 3 am</button>
+              <button type="button" data-case="siren" aria-pressed="false"><b>V.</b> Morning gridlock, siren on</button>
+              <button type="button" data-case="match" aria-pressed="false"><b>VI.</b> Match night at Chinnaswamy</button>
+            </div>
+          </div>
+
+          <details class="adv wide">
+            <summary>Under the hood: algorithm and map tools</summary>
+            <div class="adv-body">
+              <div class="ctl">
+                <span class="lbl">Algorithm <em id="algoNote"></em></span>
+                <div class="seg" id="algoSeg" role="group" aria-label="Algorithm">
+                  <button type="button" data-algo="dijkstra" aria-pressed="false">Dijkstra</button>
+                  <button type="button" data-algo="astar" aria-pressed="true">A*</button>
+                  <button type="button" data-algo="bidir" aria-pressed="false">Bidirectional</button>
+                  <button type="button" data-algo="bellman" aria-pressed="false">Bellman–Ford</button>
+                  <button type="button" data-algo="greedy" aria-pressed="false">Greedy</button>
+                </div>
+              </div>
+              <div class="ctl">
+                <span class="lbl">A click on the map will</span>
+                <div class="seg" id="toolSeg" role="group" aria-label="Click action">
+                  <button type="button" data-tool="route" aria-pressed="true">Place a point</button>
+                  <button type="button" data-tool="block" aria-pressed="false">Close a road</button>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <aside class="ticket" id="ticket" aria-live="polite">
+        <div class="t-head"><span><svg class="amb" viewBox="0 0 28 19" aria-hidden="true"><rect class="a-light" x="10.6" y="0.7" width="3.6" height="2.1"/><path class="a-body" d="M1 14V4.2Q1 3 2.2 3H17.3L22.4 9.2 26.2 10Q27 10.2 27 11V14Z"/><rect class="a-red" x="1.7" y="10.9" width="24.6" height="1.5"/><path class="a-ink" d="M18.2 4.6 21.7 9H18.2Z"/><path class="a-red" d="M6.2 6.1h4.6v1.3H6.2zM7.85 4.45h1.3v4.6h-1.3z"/><circle class="a-ink" cx="6.2" cy="14.4" r="2.9"/><circle class="a-hub" cx="6.2" cy="14.4" r="1.1"/><circle class="a-ink" cx="22.1" cy="14.4" r="2.9"/><circle class="a-hub" cx="22.1" cy="14.4" r="1.1"/></svg>Dispatch ticket</span><span id="tNo">№ 0001</span></div>
+        <div class="t-eta"><span id="eta">–</span><small>min ETA</small></div>
+        <p class="t-sub" id="etaSub"></p>
+        <figure class="split" id="split" hidden>
+          <figcaption>Where the minutes go</figcaption>
+          <div class="split-bar" id="splitBar"></div>
+          <ul class="split-key" id="splitKey"></ul>
+          <p class="split-note" id="splitNote"></p>
+        </figure>
+        <dl class="t-rows">
+          <div><dt>From</dt><dd id="tFrom">–</dd></div>
+          <div><dt>To</dt><dd id="tTo">–</dd></div>
+          <div class="via"><dt>Via</dt><dd id="tVia">–</dd></div>
+          <div><dt>Distance</dt><dd id="tDist">–</dd></div>
+          <div><dt>Mean speed</dt><dd id="tSpeed">–</dd></div>
+          <div class="sep"><dt>Algorithm</dt><dd id="tAlgo">–</dd></div>
+          <div><dt>Junctions expanded</dt><dd id="tExp">–</dd></div>
+          <div><dt>Edges examined</dt><dd id="tRel">–</dd></div>
+          <div><dt id="tCmpLabel">Work vs Dijkstra</dt><dd id="tCmp">–</dd></div>
+          <div><dt>Search time</dt><dd id="tMs">–</dd></div>
+        </dl>
+        <div id="rank" class="t-rank"></div>
+        <p id="verdict" class="t-verdict"></p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 03 RACE -->
+<section id="race" class="sec">
+  <div class="sec-no" aria-hidden="true">03</div>
+  <div class="sec-main">
+    <p class="kicker">Same trip, five strategies</p>
+    <h2>The race</h2>
+    <p class="lede">Every plate answers the same question on the same traffic. The shared clock counts <b>edge relaxations</b>, the unit of real work, so the algorithm that thinks less finishes first. Watch where the ink spreads: Dijkstra floods in every direction; A* leans toward the goal; Bidirectional grows two lakes that meet; Bellman–Ford keeps re-reading the whole map; Greedy sprints, and sometimes sprints the wrong way.</p>
+    <div class="race-bar">
+      <div class="race-q"><span class="lbl">Trip</span><b id="raceQuery">–</b></div>
+      <div class="race-btns">
+        <button class="btn" id="raceRun" type="button">Run: Airport → Electronic City</button>
+        <button class="btn" id="raceNew" type="button">Random cross-city trip</button>
+        <button class="btn" id="raceConsole" type="button">Use console A → B</button>
+        <button class="btn solid" id="raceSkip" type="button">Skip to the end</button>
+      </div>
+    </div>
+    <div class="race-grid" id="raceGrid"></div>
+    <p class="race-note" id="raceNote"></p>
+    <p class="fine">Click any plate to open it as the big picture. The race uses the console’s current scene (day, sky, events, closed roads), so change the scene above and re-run it.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 04 PROOF -->
+<section id="proof" class="sec">
+  <div class="sec-no" aria-hidden="true">04</div>
+  <div class="sec-main">
+    <p class="kicker">Does it actually work?</p>
+    <h2>The proof ledger</h2>
+    <p class="lede">Ten executable claims. Nothing here is hard-coded: each test builds its own city, runs the real algorithms and compares them with a hand-checked answer or with each other. Edge cases (island nodes, sealed junctions, source = target) are included on purpose.</p>
+    <div class="ledger-head">
+      <span id="testSummary" class="summary">–</span>
+      <button class="btn" id="testsRun" type="button">Run all tests again</button>
+    </div>
+    <div class="ledger-wrap">
+      <ol class="ledger" id="ledger"></ol>
+      <div class="stamp" id="stamp" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 05 LAB -->
+<section id="lab" class="sec">
+  <div class="sec-no" aria-hidden="true">05</div>
+  <div class="sec-main">
+    <p class="kicker">Complexity, measured</p>
+    <h2>The benchmark lab</h2>
+    <p class="lede">Theory says Dijkstra and A* cost O((V+E) log V) and Bellman–Ford O(V·E). Here is what the stopwatch says. Eight cities from ~60 to ~8 000 junctions, 80 random trips each, evening-peak traffic, best of three timed passes. Straight lines on a log–log plot are power laws; their slope is the exponent.</p>
+    <div class="lab-bar">
+      <button class="btn" id="labRun" type="button">Re-run experiment</button>
+      <button class="btn" id="labCSV" type="button">Copy results as CSV</button>
+      <div class="prog" id="labProg"><div id="labBar"><b></b></div><span id="labMsg"></span></div>
+    </div>
+
+    <div class="lab-grid">
+      <figure><figcaption><b>Fig. 5a</b> Time per query. Hover for values, click a name to hide it, switch the scale to see why a log axis is needed.</figcaption><div id="chartMs" class="chart-host"></div></figure>
+      <figure><figcaption><b>Fig. 5b</b> Edges examined per query: hardware-independent</figcaption><div id="chartWork" class="chart-host"></div></figure>
+    </div>
+
+    <div class="table-wrap">
+      <table id="labTable" class="data"></table>
+      <p class="fine" id="labCap"></p>
+    </div>
+
+    <figure class="wide-fig">
+      <figcaption><b>Fig. 5c</b> The price of congestion. How much of Dijkstra's search does each rival still need, hour by hour? Shaded: the traffic curve driving the city. Click any hour to send it to the console clock.</figcaption>
+      <div id="chartHours" class="chart-host short"></div>
+    </figure>
+
+    <div class="findings">
+      <h3>What the numbers say</h3>
+      <ul id="labFacts"></ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 06 WHY -->
+<section id="why" class="sec">
+  <div class="sec-no" aria-hidden="true">06</div>
+  <div class="sec-main">
+    <p class="kicker">Justification</p>
+    <h2>Why A*, and where it stops being the answer</h2>
+
+    <div class="table-wrap">
+      <table class="data compare">
+        <thead><tr><th>Algorithm</th><th>Time</th><th>Space</th><th>Optimal?</th><th>Needs</th><th>Measured work vs Dijkstra</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><i class="sw" style="background:var(--c-dijkstra)"></i>Dijkstra</th><td>O((V+E) log V)</td><td>O(V+E)</td><td>Yes</td><td>non-negative weights</td><td>100%</td></tr>
+          <tr class="pick"><th scope="row"><i class="sw" style="background:var(--c-astar)"></i>A*</th><td>O((V+E) log V) worst case; far less with a good <i>h</i></td><td>O(V+E)</td><td>Yes, if <i>h</i> is admissible</td><td>coordinates, admissible <i>h</i></td><td><b data-fact="astarRel">…</b> of the edges</td></tr>
+          <tr><th scope="row"><i class="sw" style="background:var(--c-bidir)"></i>Bidirectional</th><td>O((V+E) log V)</td><td>O(V+E)</td><td>Yes</td><td>reversible graph</td><td><b data-fact="bidirRel">…</b> of the edges</td></tr>
+          <tr><th scope="row"><i class="sw" style="background:var(--c-bellman)"></i>Bellman–Ford</th><td>O(V·E)</td><td>O(V+E)</td><td>Yes</td><td>nothing (handles negatives)</td><td><b data-fact="bfX">…</b> the edges</td></tr>
+          <tr><th scope="row"><i class="sw" style="background:var(--c-greedy)"></i>Greedy best-first</th><td>O((V+E) log V)</td><td>O(V+E)</td><td><b>No</b></td><td>coordinates</td><td>tiny, but wrong on many trips (test T8)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ol class="reasons">
+      <li><h3>Edge costs are non-negative and geometric.</h3><p>A* needs a lower bound on the remaining cost. A road can never beat the straight line at the network's best speed, so the bound exists. Bellman–Ford's superpower (negative edges) is useless for travel time, and its O(V·E) bill is the price: see Fig. 5b.</p></li>
+      <li><h3>The weights change every minute and roads close.</h3><p>Speed-up schemes such as Contraction Hierarchies or ALT landmarks pre-compute shortcuts against fixed weights. A flooded road or a new rush hour invalidates them. A* has no preprocessing: a closure is just a number turning to ∞, and the next query already knows.</p></li>
+      <li><h3>The heuristic is adaptive, and provably safe.</h3><p><i>h(v)</i> = (smallest minutes-per-km on any open road <i>right now</i>) × straight-line distance to the goal. It tightens when the network is fast and loosens when it jams, yet stays admissible and consistent. Test T6 checks both inequalities on every junction and road at three times of day, so A* still returns the optimum and never reopens a node.</p></li>
+      <li><h3>Dispatch is a different question, so it gets a different algorithm.</h3><p>“Nearest hospital” has no single goal for <i>h</i> to point at. One multi-target Dijkstra from the incident settles hospitals in order of ETA, giving a ranked list for the price of one search. The ticket compares that with running A* once per hospital.</p></li>
+      <li><h3>The honest limit.</h3><p>A*’s advantage is not constant. It expanded <b data-hour="lo">…</b> of Dijkstra’s nodes at the quietest hour but <b data-hour="hi">…</b> at the worst (Fig. 5c): when every road is slow, the straight-line bound is loose. And fewer expansions do not convert one-for-one into milliseconds, because every push now also evaluates a square root (compare Fig. 5a with 5b). Bidirectional search is a close rival and the better choice on a network with no coordinates (a metro map, say). For a million-node city with static weights, preprocessing-based methods win outright.</p></li>
+    </ol>
+
+    <div class="cols proof-cols">
+      <div class="prose">
+        <h3>Complexity, argued</h3>
+        <p><b>Time.</b> Each node is settled once and each edge is relaxed at most twice (once per endpoint). A relaxation may push to the binary heap in O(log E) = O(log V), so the total is O((V+E) log V). With <i>h ≡ 0</i>, A* <i>is</i> Dijkstra, so its worst case is the same; with a consistent <i>h</i> the set of nodes it expands is a subset of Dijkstra’s. Bellman–Ford makes up to V−1 passes over all E edges: O(V·E).</p>
+        <p><b>Space.</b> Distance, parent and closed arrays are O(V); the CSR adjacency is O(V+E); the lazy-deletion heap holds at most one entry per successful relaxation, O(E). Total O(V+E) for every algorithm here.</p>
+        <p><b>Measured.</b> Fig. 5b fits the exponent from the data: Dijkstra’s edge work grew as V<sup data-fact="dK">…</sup>, Bellman–Ford’s as V<sup data-fact="bfK">…</sup>. Dijkstra comes out almost exactly linear because a random trip floods a roughly constant fraction of the city; the log V of the heap is too small to show over this range. Bellman–Ford lands near V<sup>1.5</sup>, not the V² its bound allows: it needs about as many passes as the graph’s hop-diameter, and on a planar road network that grows like √V while E grows like V. The O(V·E) figure is the worst case, reached on long path-like graphs.</p>
+      </div>
+      <div class="prose">
+        <h3>Limits and next steps</h3>
+        <ul class="plain">
+          <li>Places are real; the street mesh between them is generated. Loading an OpenStreetMap extract only changes <code>buildCity()</code>.</li>
+          <li>Speeds and the “siren clears 55% of congestion” factor are assumptions, not measurements.</li>
+          <li>No turn penalties, signals or one-way streets; the graph is undirected.</li>
+          <li>Weights are a snapshot at clock <i>t</i>; real systems stream live speeds.</li>
+          <li>Next: ALT landmarks (A* with a precomputed, still-admissible bound) and customizable contraction hierarchies that survive weight changes.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 07 COLOPHON -->
+<section id="colophon" class="sec last">
+  <div class="sec-no" aria-hidden="true">07</div>
+  <div class="sec-main">
+    <p class="kicker">Colophon</p>
+    <div class="cols">
+      <div class="prose">
+        <h3>How it is built</h3>
+        <p>Plain HTML, CSS and JavaScript: no frameworks, no chart library, no build step, and no network use beyond the two typefaces. <code>graph.js</code> generates the city and the traffic model; <code>algorithms.js</code> holds all five searches plus the binary heap; <code>tests.js</code> is the ledger; <code>lab.js</code> the benchmarks and hand-drawn SVG charts; <code>plate.js</code> and <code>race.js</code> the renderers. Open DevTools and type <code>CORRIDOR.g</code> to poke at the live graph.</p>
+        <h3>Typefaces</h3>
+        <p>Fraunces for text, IBM Plex Mono for data. Offline, the page falls back to Georgia and Consolas.</p>
+      </div>
+      <div class="prose">
+        <h3>References</h3>
+        <ol class="refs">
+          <li>E. W. Dijkstra, “A note on two problems in connexion with graphs”, <i>Numerische Mathematik</i> 1, 1959.</li>
+          <li>P. E. Hart, N. J. Nilsson, B. Raphael, “A formal basis for the heuristic determination of minimum cost paths”, <i>IEEE Trans. SSC</i> 4(2), 1968.</li>
+          <li>R. Bellman, “On a routing problem”, <i>Quarterly of Applied Mathematics</i> 16, 1958; L. R. Ford Jr., <i>Network Flow Theory</i>, RAND, 1956.</li>
+          <li>I. Pohl, “Bi-directional search”, <i>Machine Intelligence</i> 6, 1971.</li>
+          <li>T. H. Cormen, C. E. Leiserson, R. L. Rivest, C. Stein, <i>Introduction to Algorithms</i>, ch. 22 and 24.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <span>Corridor · DAA CIA-3 · Nebin Stanly · 2443142</span><span>Every number on this page is computed in your browser, live.</span>
+</footer>
+
+<div class="theatre" id="theatre" hidden role="dialog" aria-modal="true" aria-labelledby="thTitle">
+  <header class="th-head">
+    <div class="th-what"><span class="lbl">The big picture</span><h3 id="thTitle">–</h3><p id="thSub"></p></div>
+    <div class="seg" id="thAlgo" role="group" aria-label="Algorithm"></div>
+    <button class="btn solid" id="thClose" type="button">Close · Esc</button>
+  </header>
+  <div class="th-body">
+    <div class="th-stage"><canvas id="thCanvas" aria-label="Full-screen replay of the search"></canvas></div>
+    <aside class="th-side">
+      <p class="th-blurb" id="thBlurb"></p>
+      <dl class="th-stats">
+        <div><dt>Junctions visited</dt><dd id="thVisited">–</dd></div>
+        <div><dt>Share of the city</dt><dd id="thShare">–</dd></div>
+        <div><dt>Road segments examined</dt><dd id="thWork">–</dd></div>
+        <div><dt>Answer</dt><dd id="thEta">–</dd></div>
+      </dl>
+      <figure class="th-curve">
+        <figcaption>Edges examined ↑ against junctions visited →</figcaption>
+        <svg id="thCurve" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </figure>
+      <p class="th-verdict" id="thVerdict"></p>
+      <ul class="th-legend">
+        <li><i class="lg tree"></i>search tree, in the order it grew</li>
+        <li><i class="lg tree back"></i>second front (bidirectional only)</li>
+        <li><i class="lg route"></i>the route it returns</li>
+      </ul>
+    </aside>
+  </div>
+  <footer class="th-ctrl">
+    <button class="btn solid" id="thPlay" type="button">Pause</button>
+    <button class="btn" id="thReplay" type="button">↻ Replay</button>
+    <input type="range" id="thScrub" min="0" max="1000" value="0" aria-label="Scrub through the search">
+    <span class="th-step" id="thStep"></span>
+    <div class="seg" id="thSpeed" role="group" aria-label="Speed">
+      <button type="button" data-speed="0.25" aria-pressed="false">¼×</button>
+      <button type="button" data-speed="1" aria-pressed="true">1×</button>
+      <button type="button" data-speed="3" aria-pressed="false">3×</button>
+      <button type="button" data-speed="10" aria-pressed="false">10×</button>
+    </div>
+  </footer>
+</div>
+
+<script src="js/graph.js"></script>
+<script src="js/algorithms.js"></script>
+<script src="js/tests.js"></script>
+<script src="js/lab.js"></script>
+<script src="js/plate.js"></script>
+<script src="js/race.js"></script>
+<script src="js/theatre.js"></script>
+<script src="js/hero.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
