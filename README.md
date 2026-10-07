@@ -2,9 +2,7 @@
 
 **An emergency-routing atlas for Bengaluru.** Finds the fastest route for an ambulance when every road's travel time depends on the day, the hour, the weather and what is happening in the city.
 
-**Live:** https://h0gr1d3r-code.github.io/corridor/
-
-The source lives in `public/corridor/` of the [portfolio repository](https://github.com/H0GR1D3R-CODE/H0GR1D3R-CODE.github.io/tree/main/public/corridor).
+**Live:** https://h0gr1d3r-code.github.io/corridor-routing-atlas/
 
 Design & Analysis of Algorithms · CIA 3 Innovative Assignment (algorithm-based prototype)
 Nebin Stanly · Reg. No. 2443142 · Staff-in-charge: Dr. P. Margaret Savitha
