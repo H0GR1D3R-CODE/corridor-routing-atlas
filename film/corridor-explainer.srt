@@ -1,0 +1,204 @@
+1
+00:00:02,850 --> 00:00:08,048
+An ambulance has to cross Bengaluru. Which road is fastest, right now?
+
+2
+00:00:09,583 --> 00:00:14,548
+This is Corridor: a working prototype that routes ambulances across Bengaluru.
+
+3
+00:00:14,668 --> 00:00:19,846
+The board is live. Every ambulance is driving a route solved a moment ago.
+
+4
+00:00:19,966 --> 00:00:27,379
+832 junctions, 1,630 roads, 15 hospitals, and five algorithms to compare.
+
+5
+00:00:29,967 --> 00:00:33,450
+The problem: the fastest road is rarely the shortest one.
+
+6
+00:00:33,867 --> 00:00:38,561
+A city is a graph. Each road costs its travel time this minute.
+
+7
+00:00:39,267 --> 00:00:45,909
+The chosen algorithms: A* for a trip between two places, multi-target Dijkstra for the nearest hospital.
+
+8
+00:00:48,500 --> 00:00:55,357
+Story one. 6:30 pm, a call from Yeshwanthpur. Which hospital, and which roads?
+
+9
+00:00:55,477 --> 00:01:01,624
+One multi-target Dijkstra spreads from the incident and stops at the first hospital it reaches.
+
+10
+00:01:01,744 --> 00:01:05,574
+The ticket: 26.2 minutes to ESI Rajajinagar.
+
+11
+00:01:05,694 --> 00:01:09,626
+It searched only 15 of 832 junctions.
+
+12
+00:01:09,994 --> 00:01:15,167
+Ramaiah Memorial is closer on the map, but would take 33.7 minutes.
+
+13
+00:01:15,287 --> 00:01:17,124
+Distance is the wrong question.
+
+14
+00:01:20,800 --> 00:01:25,615
+Any trip works. Sixty-two real places: just type a few letters.
+
+15
+00:01:25,735 --> 00:01:29,873
+Kengeri to Whitefield, right across the city at the evening peak.
+
+16
+00:01:30,435 --> 00:01:34,776
+A* aims its search at the destination instead of flooding the map.
+
+17
+00:01:35,635 --> 00:01:40,046
+The same answer as Dijkstra, with 46% of the work.
+
+18
+00:01:44,133 --> 00:01:50,202
+Now change the world. One tap sets the scene: rush hour, rain, a lazy Sunday.
+
+19
+00:01:50,322 --> 00:01:54,562
+The panel explains the slowdown: time of day, weather and events.
+
+20
+00:01:54,822 --> 00:01:57,956
+Drag the clock, and every road is re-priced.
+
+21
+00:02:00,022 --> 00:02:05,979
+Even an apocalypse: 123 roads closed, the city nearly five times slower.
+
+22
+00:02:06,099 --> 00:02:08,248
+The dispatch re-plans at once.
+
+23
+00:02:11,400 --> 00:02:17,736
+Story three. A monsoon flood shuts 28 roads between Electronic City and Hebbal.
+
+24
+00:02:17,856 --> 00:02:23,488
+A* routes around the water. A closed road is simply a cost of infinity.
+
+25
+00:02:23,856 --> 00:02:31,046
+The ticket splits the 134 minutes: 38 of open road, 70 of traffic, 27 of rain.
+
+26
+00:02:31,166 --> 00:02:34,626
+The detour itself costs only 3.7 minutes.
+
+27
+00:02:37,267 --> 00:02:40,104
+Big picture opens any search full screen.
+
+28
+00:02:41,267 --> 00:02:44,258
+Watch A* lean north, towards Hebbal.
+
+29
+00:02:45,667 --> 00:02:51,177
+281 junctions and 1,098 road segments to find the route.
+
+30
+00:02:51,297 --> 00:02:57,042
+Bellman–Ford finds the same route after 112,140 edge checks.
+
+31
+00:02:57,162 --> 00:02:59,607
+Drag the scrubber to walk through the search.
+
+32
+00:03:04,067 --> 00:03:09,977
+The race. Five algorithms, one trip. The clock counts edges examined.
+
+33
+00:03:10,097 --> 00:03:14,587
+Greedy sprints home first, but its route is 47% slower.
+
+34
+00:03:14,707 --> 00:03:17,813
+Among the correct ones, A* finishes first.
+
+35
+00:03:18,907 --> 00:03:23,168
+Bellman–Ford is still re-reading the whole map, so skip to the end.
+
+36
+00:03:23,288 --> 00:03:30,324
+136,920 edges, for the answer A* found with 1,271.
+
+37
+00:03:30,444 --> 00:03:35,325
+Four optimal algorithms, one answer. Only the work differs.
+
+38
+00:03:37,900 --> 00:03:43,673
+Does it actually work? Ten executable tests run the real algorithms in the browser.
+
+39
+00:03:43,793 --> 00:03:47,565
+Optimality, edge cases, and a heuristic that never lies.
+
+40
+00:03:49,093 --> 00:03:51,014
+Verified: ten out of ten.
+
+41
+00:03:55,300 --> 00:04:00,735
+The benchmark lab measures complexity: eight cities, up to 8,000 junctions.
+
+42
+00:04:00,900 --> 00:04:08,188
+Dijkstra and A* grow almost linearly. Bellman–Ford does 189 times the work.
+
+43
+00:04:08,308 --> 00:04:13,827
+On the largest city, A* examines 58% of the edges Dijkstra does.
+
+44
+00:04:14,708 --> 00:04:23,486
+The honest limit: A* needs 35% of the search Dijkstra does at 3 am, but 57% at the evening peak.
+
+45
+00:04:23,606 --> 00:04:25,918
+Every number here was measured live.
+
+46
+00:04:30,100 --> 00:04:37,413
+The verdict. A* is optimal, needs no preprocessing, and survives weights that change every minute.
+
+47
+00:04:37,533 --> 00:04:42,925
+Bellman–Ford pays O(V·E) for negative edges that travel time never has.
+
+48
+00:04:43,045 --> 00:04:47,347
+Dispatch is a different question, so it gets multi-target Dijkstra.
+
+49
+00:04:50,333 --> 00:04:54,364
+One more thing: a night chart, for the 3 am shift.
+
+50
+00:04:54,933 --> 00:05:00,743
+Airport to Electronic City on empty roads: 59 km in 66 minutes.
+
+51
+00:05:10,302 --> 00:05:16,401
+Corridor. Built by Nebin Stanly. Open it, and try the stories yourself.
+

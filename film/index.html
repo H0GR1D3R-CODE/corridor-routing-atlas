@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corridor · the film · Nebin Stanly</title>
+<meta name="description" content="A five-minute narrated walkthrough of Corridor, an emergency-routing atlas for Bengaluru. DAA CIA-3, Nebin Stanly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --paper: #ece4d2; --slip: #f4eddd; --ink: #1c1a16; --ink-2: #4b463b; --ink-3: #8c8472; --red: #d2401c; --serif: Fraunces, Georgia, serif; --mono: "IBM Plex Mono", Consolas, monospace; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 400 17px/1.55 var(--serif); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(18px, 3vw, 40px) 56px; }
+  .rule { display: flex; flex-wrap: wrap; gap: 6px 28px; padding: 14px 0 10px; border-bottom: 1px solid var(--ink); font: 500 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+  .rule .who { margin-left: auto; font-weight: 600; }
+  .kicker { font: 500 11.5px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--red); margin: 44px 0 12px; }
+  h1 { font: 420 clamp(2.4rem, 6vw, 4.6rem)/1 var(--serif); letter-spacing: -.035em; margin: 0 0 18px; font-variation-settings: "opsz" 144; }
+  h1 i { font-style: normal; color: var(--red); }
+  .lede { max-width: 44em; color: var(--ink-2); margin: 0 0 26px; font-size: 1.1rem; }
+  .screen { border: 1px solid var(--ink); outline: 1px solid var(--ink); outline-offset: 5px; margin: 6px; background: #15130f; }
+  video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+  .cap { font: 400 12px/1.5 var(--mono); color: var(--ink-2); margin: 16px 6px 0; }
+  .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 40px 0 0; padding: 0; list-style: none; }
+  .links a { display: block; height: 100%; padding: 16px 18px 18px; border: 1px solid var(--ink); background: var(--slip); color: var(--ink); text-decoration: none; transition: background .15s, color .15s; }
+  .links a:hover, .links a:focus-visible { background: var(--ink); color: var(--paper); outline: none; }
+  .links small { display: block; font: 500 10.5px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--red); margin-bottom: 9px; }
+  .links b { display: block; font: 500 1.25rem/1.2 var(--serif); letter-spacing: -.01em; }
+  .links span { display: block; font: 400 12px/1.45 var(--mono); margin-top: 8px; opacity: .75; }
+  .foot { margin-top: 48px; padding-top: 14px; border-top: 1px solid var(--ink-3); font: 400 12px/1.5 var(--mono); color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="rule">
+    <span>Design &amp; Analysis of Algorithms</span><span>CIA 3 · Innovative Assignment</span><span>Staff-in-charge: Dr. P. Margaret Savitha</span>
+    <span class="who">Nebin Stanly · Reg. No. 2443142</span>
+  </div>
+
+  <p class="kicker">The explanation</p>
+  <h1>Corridor<i>.</i> The film</h1>
+  <p class="lede">Five minutes, narrated: the problem, the dispatch console, three of the stories, the full-screen replay, the race between five algorithms, the proof ledger, the benchmark lab and the verdict. Every frame was captured from the running prototype, so each number on screen is the app's own output.</p>
+
+  <div class="screen">
+    <video controls preload="metadata" playsinline poster="poster.jpg">
+      <source src="corridor-explainer.mp4" type="video/mp4">
+      Your browser cannot play this video. <a href="corridor-explainer.mp4">Download it instead.</a>
+    </video>
+  </div>
+  <p class="cap">5 min 17 s · 1080p · subtitles are part of the picture · narration is a synthetic voice, the score was written for this cut</p>
+
+  <ul class="links">
+    <li><a href="../"><small>The prototype</small><b>Open the atlas</b><span>the live app, running in your browser</span></a></li>
+    <li><a href="../docs/corridor-requirements-and-design.pdf"><small>The document</small><b>Requirements and design</b><span>PDF · 26 pages · features, modules, diagrams and screenshots</span></a></li>
+    <li><a href="corridor-explainer.mp4" download><small>The file</small><b>Download the film</b><span>MP4 · 91 MB · subtitle file alongside as .srt</span></a></li>
+    <li><a href="https://github.com/H0GR1D3R-CODE/corridor-routing-atlas"><small>The source</small><b>Read the code</b><span>plain HTML, CSS and JavaScript, no build step</span></a></li>
+  </ul>
+
+  <p class="foot">Corridor · DAA CIA-3 · Nebin Stanly · 2443142</p>
+</div>
+</body>
+</html>

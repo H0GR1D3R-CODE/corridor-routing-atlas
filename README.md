@@ -7,6 +7,16 @@
 Design & Analysis of Algorithms · CIA 3 Innovative Assignment (algorithm-based prototype)
 Nebin Stanly · Reg. No. 2443142 · Staff-in-charge: Dr. P. Margaret Savitha
 
+## Watch and read
+
+| | |
+|---|---|
+| **The film** | A five-minute narrated walkthrough, captured from the running prototype: [watch it](https://h0gr1d3r-code.github.io/corridor-routing-atlas/film/) · [MP4](film/corridor-explainer.mp4) · [subtitles](film/corridor-explainer.srt) |
+| **The document** | Requirements and design, 26 pages with diagrams and screenshots: [PDF](docs/corridor-requirements-and-design.pdf) · [Word](docs/corridor-requirements-and-design.docx) |
+| **The prototype** | [Open the atlas](https://h0gr1d3r-code.github.io/corridor-routing-atlas/) |
+
+A full-quality copy of the film is attached to the [latest release](https://github.com/H0GR1D3R-CODE/corridor-routing-atlas/releases/latest).
+
 ## What it does
 
 - **Routes on a road graph** of 832 junctions and 1,630 road segments, with 62 real places, 15 hospitals and 11 named highways positioned from approximate latitude and longitude. The street mesh between them is generated.
